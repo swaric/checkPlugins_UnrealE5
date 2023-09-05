@@ -26,7 +26,23 @@ class UnrealPluginManager:
 
         self.load_default_project()
 
+    def load_default_project(self):
+         # Add a button to select the Unreal project folder
+        self.browse_button = ttk.Button(self.root, text="Browse Unreal Project Folder", command=self.browse_folder)
+        self.browse_button.pack(pady=10)
+    def browse_folder(self):
+    # Ask the user to select a directory
+        selected_directory = filedialog.askdirectory()
+        if selected_directory:
+            uproject_files = [f for f in os.listdir(selected_directory) if f.endswith('.uproject')]
+            if uproject_files:
+                self.project_path = os.path.join(selected_directory, uproject_files[0])
+                self.load_plugins()
+            else:
+                tk.messagebox.showwarning("Warning", "No .uproject files found in the selected directory!")
+
     def select_all_plugins(self):
+    
         """Select all plugins."""
         for var in self.checkbox_vars.values():
             var.set(True)
