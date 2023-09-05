@@ -1,7 +1,7 @@
 import os
 import json
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, messagebox
 
 class UnrealPluginManager:
     def __init__(self, root):
@@ -9,12 +9,32 @@ class UnrealPluginManager:
         self.root.title("Unreal Plugin Manager")
 
         self.plugins_frame = ttk.Frame(root)
-        self.plugins_frame.pack()
+        self.plugins_frame.pack(pady=10)
 
         self.project_path = ""
         self.plugins = []
 
+        # Add Select All and Deselect All buttons
+        self.button_frame = ttk.Frame(self.plugins_frame)
+        self.button_frame.pack(pady=10)
+
+        self.select_all_button = ttk.Button(self.button_frame, text="Select All", command=self.select_all_plugins)
+        self.select_all_button.pack(side=tk.LEFT, padx=5)
+
+        self.deselect_all_button = ttk.Button(self.button_frame, text="Deselect All", command=self.deselect_all_plugins)
+        self.deselect_all_button.pack(side=tk.LEFT, padx=5)
+
         self.load_default_project()
+
+    def select_all_plugins(self):
+        """Select all plugins."""
+        for var in self.checkbox_vars.values():
+            var.set(True)
+
+    def deselect_all_plugins(self):
+        """Deselect all plugins."""
+        for var in self.checkbox_vars.values():
+            var.set(False)
 
     def load_default_project(self):
         script_directory = os.path.dirname(os.path.abspath(__file__))
@@ -64,7 +84,7 @@ class UnrealPluginManager:
         # Write back to .uproject file
         with open(self.project_path, "w") as f:
             json.dump({"Plugins": self.plugins}, f, indent=4)
-
+        tk.messagebox.showinfo("Information", "File Saved Successfully!")
         self.root.destroy()
 
 if __name__ == "__main__":
