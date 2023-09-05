@@ -138,9 +138,19 @@ class UnrealPluginManager:
             checkbox_var = self.checkbox_vars.get(plugin_name)
             if checkbox_var is not None:
                 plugin_data["Enabled"] = checkbox_var.get()
-        # Merge the header data with the modified plugins data
-        save_data = {**header_data, "Plugins": self.plugins}
-    
+         # Read the original .uproject file to extract the header values
+        with open(self.project_path, "r") as f:
+            original_data = json.load(f)
+
+        # Remove the "Plugins" key from the original data to get only the header values
+        original_data.pop("Plugins", None)
+
+        # Merge the original header values with the header_data
+        combined_header = {**header_data, **original_data}
+
+        # Merge the combined header with the modified plugins data
+        save_data = {**combined_header, "Plugins": self.plugins}
+
         # Write back to .uproject file
         with open(self.project_path, "w") as f:
             json.dump(save_data, f, indent=4)
