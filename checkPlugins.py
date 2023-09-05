@@ -1,10 +1,39 @@
+#!/usr/bin/env python3
+
+"""
+Unreal Plugin Manager
+
+This script provides a GUI tool to manage plugins in an Unreal project.
+The user can:
+- Browse to an Unreal project folder.
+- View a list of plugins in the project.
+- Enable or disable plugins using checkboxes.
+- Save changes to the project file.
+
+Usage:
+Run the script, and the GUI will appear. From there, you can browse to your Unreal project folder,
+select or deselect plugins, and save your changes.
+
+Requirements:
+- tkinter
+"""
 import os
 import json
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
 class UnrealPluginManager:
+    """
+    A class to represent the Unreal Plugin Manager GUI.
+    
+    Attributes:
+    - root: The main tkinter window.
+    - plugins_frame: Frame to hold the plugins list.
+    - project_path: Path to the selected Unreal project.
+    - plugins: List of plugins in the project.
+    """
     def __init__(self, root):
+        """Initialize the GUI components."""
         self.root = root
         self.root.title("Unreal Plugin Manager")
 
@@ -31,6 +60,10 @@ class UnrealPluginManager:
         self.browse_button = ttk.Button(self.root, text="Browse Unreal Project Folder", command=self.browse_folder)
         self.browse_button.pack(pady=10)
     def browse_folder(self):
+        """
+        Open a directory browser and let the user select an Unreal project folder.
+        If a valid project is found, load the plugins from it.
+        """
     # Ask the user to select a directory
         selected_directory = filedialog.askdirectory()
         if selected_directory:
@@ -53,6 +86,7 @@ class UnrealPluginManager:
             var.set(False)
 
     def load_default_project(self):
+        """Load the plugins from the default(Current directory) Unreal project."""
         script_directory = os.path.dirname(os.path.abspath(__file__))
         uproject_files = [f for f in os.listdir(script_directory) if f.endswith('.uproject')]
 
@@ -64,6 +98,7 @@ class UnrealPluginManager:
             self.load_button.pack()
 
     def load_project(self):
+        """Load the plugins from the selected Unreal project."""
         self.project_path = filedialog.askopenfilename(filetypes=[("Unreal Project Files", "*.uproject")])
         if self.project_path:
             self.load_plugins()
@@ -90,16 +125,25 @@ class UnrealPluginManager:
         save_button.pack()
 
     def save_plugins(self):
+        # Define the provided content
+        header_data = {
+            "FileVersion": 3,
+            "EngineAssociation": "5.2",
+            "Category": "",
+            "Description": ""
+        }
         # Update plugin enabled status based on checkboxes
         for plugin_data in self.plugins:
             plugin_name = plugin_data.get("Name", "")
             checkbox_var = self.checkbox_vars.get(plugin_name)
             if checkbox_var is not None:
                 plugin_data["Enabled"] = checkbox_var.get()
-
+        # Merge the header data with the modified plugins data
+        save_data = {**header_data, "Plugins": self.plugins}
+    
         # Write back to .uproject file
         with open(self.project_path, "w") as f:
-            json.dump({"Plugins": self.plugins}, f, indent=4)
+            json.dump(save_data, f, indent=4)
         tk.messagebox.showinfo("Information", "File Saved Successfully!")
         self.root.destroy()
 
